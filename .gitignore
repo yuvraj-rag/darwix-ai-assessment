@@ -1,0 +1,132 @@
+# ==========================================
+# Python
+# ==========================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# ==========================================
+# Virtual environments
+# ==========================================
+
+.venv/
+venv/
+
+# ==========================================
+# IDE / editors
+# ==========================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.code-workspace
+
+# ==========================================
+# Testing / coverage
+# ==========================================
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ==========================================
+# Build / packaging
+# ==========================================
+
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# ==========================================
+# AI / ML models
+# ==========================================
+
+*.onnx
+*.onnx.json
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.ckpt
+
+# Common model directories
+models/
+model/
+whisper/
+faster-whisper/
+piper/
+voices/
+
+# ==========================================
+# Q2 generated data
+# ==========================================
+
+data/processed/
+data/chroma/
+
+# ==========================================
+# Audio / voice-agent generated files
+# ==========================================
+
+generated_audio/
+recordings/
+uploads/
+outputs/
+audio/
+test_audio/
+test_recordings/
+test_output/
+debug_output/
+
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+*.webm
+
+# ==========================================
+# Temporary / generated files
+# ==========================================
+
+tmp/
+temp/
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Local databases
+# ==========================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# Jupyter
+# ==========================================
+
+.ipynb_checkpoints/
+
+# ==========================================
+# OS files
+# ==========================================
+
+.DS_Store
+Thumbs.db
+desktop.ini

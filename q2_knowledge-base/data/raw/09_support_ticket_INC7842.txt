@@ -1,0 +1,15 @@
+INC-7842
+Opened: 2026-05-18 10:14
+Customer: GreenBasket Retail / AC-8831
+Site: 17 Market Lane, Bellmere
+Priority: P2
+Asset: Walk-in freezer, asset GB-FRZ-019
+Issue: Temperature intermittently above -15C.
+
+Technician note, 18 May 14:40:
+Found damaged door gasket. Temporary adjustment made. Customer requested replacement part.
+
+Follow-up, 20 May:
+Replacement gasket scheduled for 22 May, technician assigned: Sana Iqbal.
+
+Customer says alarm occurred three times overnight. No product loss reported.

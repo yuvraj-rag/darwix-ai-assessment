@@ -1,0 +1,6 @@
+account_id,customer_name,site,contract,service_tier,renewal_date,assigned_region
+AC-8831,GreenBasket Retail,"17 Market Lane, Bellmere",NS-FS-2219,Gold,2026-11-30,Bellmere
+AC-8847,Harborline Foods,"88 Dock Road, Redhaven",NS-FS-2241,Silver,2027-02-28,Redhaven
+AC-8910,Cedar & Finch Hotels,"2 Lantern Street, Oakridge",NS-FS-2310,Gold,2026-10-15,Oakridge
+AC-8933,Morrow Medical Supplies,"41 Civic Way, Bellmere",NS-FS-2338,Platinum,2027-01-31,Bellmere
+AC-8991,Northbridge Schools,"6 Orchard Crescent, Northbridge",NS-FS-2401,Silver,2026-12-31,Northbridge

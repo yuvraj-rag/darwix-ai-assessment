@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northstar Voice Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        #recordButton {
+            background: #222;
+            color: white;
+        }
+
+        #recordButton.recording {
+            background: #c62828;
+        }
+
+        #askButton {
+            background: #1976d2;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 90px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+            font-size: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .result {
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .metric {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 18px;
+            margin-top: 4px;
+        }
+
+        .source {
+            padding: 10px;
+            margin-top: 8px;
+            background: #f7f7f7;
+            border-left: 3px solid #1976d2;
+        }
+
+        .qualification-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .qualification-item:last-child {
+            border-bottom: none;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        #statusMessage {
+            margin-top: 12px;
+            color: #666;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Northstar Voice Assistant</h1>
+    <div class="subtitle">
+        Knowledge-grounded business assistant
+    </div>
+
+    <div class="card">
+        <div class="label">Voice Input</div>
+
+        <button id="recordButton">
+            Start Recording
+        </button>
+
+        <div id="statusMessage">
+            Ready.
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="label">Or Ask by Text</div>
+
+        <textarea
+            id="questionInput"
+            placeholder="Ask a question..."
+        ></textarea>
+
+        <br><br>
+
+        <button id="askButton">
+            Ask
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="label">Transcript</div>
+
+        <div id="transcript" class="result">
+            No transcript yet.
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="label">Assistant Answer</div>
+
+        <div id="answer" class="result">
+            No answer yet.
+        </div>
+
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+    </div>
+
+    <div
+        class="card"
+        id="qualificationCard"
+        style="display: none;"
+    >
+        <div class="label">Loan Qualification</div>
+
+        <div id="qualification"></div>
+    </div>
+
+    <div class="card">
+        <div class="label">Latency</div>
+
+        <div class="metrics">
+            <div class="metric">
+                STT
+                <strong id="sttLatency">-</strong>
+            </div>
+
+            <div class="metric">
+                Retrieval
+                <strong id="retrievalLatency">-</strong>
+            </div>
+
+            <div class="metric">
+                LLM
+                <strong id="llmLatency">-</strong>
+            </div>
+
+            <div class="metric">
+                Total
+                <strong id="totalLatency">-</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="label">Knowledge Sources</div>
+
+        <div id="sources">
+            No sources yet.
+        </div>
+    </div>
+
+<script>
+    const recordButton = document.getElementById("recordButton");
+    const askButton = document.getElementById("askButton");
+    const questionInput = document.getElementById("questionInput");
+
+    const statusMessage = document.getElementById("statusMessage");
+    const transcriptElement = document.getElementById("transcript");
+    const answerElement = document.getElementById("answer");
+
+    const audioPlayer = document.getElementById("audioPlayer");
+
+    const qualificationCard =
+        document.getElementById("qualificationCard");
+
+    const qualificationElement =
+        document.getElementById("qualification");
+
+    const sourcesElement =
+        document.getElementById("sources");
+
+    const sttLatency =
+        document.getElementById("sttLatency");
+
+    const retrievalLatency =
+        document.getElementById("retrievalLatency");
+
+    const llmLatency =
+        document.getElementById("llmLatency");
+
+    const totalLatency =
+        document.getElementById("totalLatency");
+
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+
+    recordButton.addEventListener(
+        "click",
+        async () => {
+
+            if (mediaRecorder &&
+                mediaRecorder.state === "recording") {
+
+                mediaRecorder.stop();
+                return;
+            }
+
+            try {
+                const stream =
+                    await navigator.mediaDevices.getUserMedia({
+                        audio: true
+                    });
+
+                audioChunks = [];
+
+                mediaRecorder =
+                    new MediaRecorder(stream);
+
+                mediaRecorder.addEventListener(
+                    "dataavailable",
+                    event => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    }
+                );
+
+                mediaRecorder.addEventListener(
+                    "stop",
+                    async () => {
+
+                        stream
+                            .getTracks()
+                            .forEach(track => track.stop());
+
+                        recordButton.textContent =
+                            "Start Recording";
+
+                        recordButton.classList.remove(
+                            "recording"
+                        );
+
+                        statusMessage.textContent =
+                            "Transcribing...";
+
+                        const audioBlob =
+                            new Blob(
+                                audioChunks,
+                                { type: "audio/webm" }
+                            );
+
+                        await processVoice(audioBlob);
+                    }
+                );
+
+                mediaRecorder.start();
+
+                recordButton.textContent =
+                    "Stop Recording";
+
+                recordButton.classList.add(
+                    "recording"
+                );
+
+                statusMessage.textContent =
+                    "Recording...";
+
+            } catch (error) {
+
+                console.error(error);
+
+                statusMessage.textContent =
+                    "Microphone access failed.";
+            }
+        }
+    );
+
+
+    askButton.addEventListener(
+        "click",
+        async () => {
+
+            const question =
+                questionInput.value.trim();
+
+            if (!question) {
+                return;
+            }
+
+            await askQuestion(question);
+        }
+    );
+
+
+    async function processVoice(audioBlob) {
+
+        try {
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "audio",
+                audioBlob,
+                "recording.webm"
+            );
+
+            const response =
+                await fetch(
+                    "/voice",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Voice request failed"
+                );
+            }
+
+            const result =
+                await response.json();
+
+            renderResult(result);
+
+            statusMessage.textContent =
+                "Ready.";
+
+        } catch (error) {
+
+            console.error(error);
+
+            statusMessage.textContent =
+                "Voice processing failed.";
+        }
+    }
+
+
+    async function askQuestion(question) {
+
+        try {
+
+            askButton.disabled = true;
+
+            statusMessage.textContent =
+                "Thinking...";
+
+            const response =
+                await fetch(
+                    "/ask",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            question: question
+                        })
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Request failed"
+                );
+            }
+
+            const result =
+                await response.json();
+
+            renderResult(result);
+
+            statusMessage.textContent =
+                "Ready.";
+
+        } catch (error) {
+
+            console.error(error);
+
+            statusMessage.textContent =
+                "Request failed.";
+
+        } finally {
+
+            askButton.disabled = false;
+        }
+    }
+
+
+    function renderResult(result) {
+
+        transcriptElement.textContent =
+            result.transcript ||
+            result.question ||
+            "No transcript.";
+
+        answerElement.textContent =
+            result.answer ||
+            "No answer.";
+
+        renderQualification(
+            result.qualification
+        );
+
+        renderSources(
+            result.sources || []
+        );
+
+        renderLatency(
+            result.latency || {}
+        );
+
+        if (result.audio_url) {
+
+            audioPlayer.src =
+                result.audio_url;
+
+            audioPlayer.style.display =
+                "block";
+
+            audioPlayer.play().catch(
+                () => {
+                    // Browser may require manual playback.
+                }
+            );
+
+        } else {
+
+            audioPlayer.style.display =
+                "none";
+
+            audioPlayer.removeAttribute(
+                "src"
+            );
+        }
+    }
+
+
+    function renderQualification(data) {
+
+        if (!data || !data.active) {
+
+            qualificationCard.style.display =
+                "none";
+
+            qualificationElement.innerHTML =
+                "";
+
+            return;
+        }
+
+        qualificationCard.style.display =
+            "block";
+
+        qualificationElement.innerHTML = `
+            <div class="qualification-item">
+                Loan amount:
+                ${data.loan_amount || "Not collected"}
+            </div>
+
+            <div class="qualification-item">
+                Business type:
+                ${data.business_type || "Not collected"}
+            </div>
+
+            <div class="qualification-item">
+                Business age:
+                ${data.business_age || "Not collected"}
+            </div>
+
+            <div class="qualification-item">
+                Loan purpose:
+                ${data.loan_purpose || "Not collected"}
+            </div>
+
+            <div class="qualification-item">
+                Status:
+                <span class="status">
+                    ${
+                        data.qualification_complete
+                            ? "Complete"
+                            : "In progress"
+                    }
+                </span>
+            </div>
+
+            ${
+                data.escalation_requested
+                    ? `
+                        <div class="qualification-item">
+                            Human assistance requested.
+                        </div>
+                    `
+                    : ""
+            }
+        `;
+    }
+
+
+    function renderSources(sources) {
+
+        if (!sources.length) {
+
+            sourcesElement.textContent =
+                "No knowledge-base sources used.";
+
+            return;
+        }
+
+        sourcesElement.innerHTML =
+            sources.map(source => `
+                <div class="source">
+                    <strong>
+                        ${source.source || "Unknown source"}
+                    </strong>
+
+                    <br>
+
+                    Record:
+                    ${source.record_id || "Unknown"}
+
+                    <br>
+
+                    Score:
+                    ${
+                        source.score !== undefined
+                            ? source.score
+                            : "N/A"
+                    }
+                </div>
+            `).join("");
+    }
+
+
+    function renderLatency(latency) {
+
+        sttLatency.textContent =
+            formatMs(latency.stt_ms);
+
+        retrievalLatency.textContent =
+            formatMs(latency.retrieval_ms);
+
+        llmLatency.textContent =
+            formatMs(latency.llm_ms);
+
+        totalLatency.textContent =
+            formatMs(latency.total_ms);
+    }
+
+
+    function formatMs(value) {
+
+        if (
+            value === undefined ||
+            value === null
+        ) {
+            return "-";
+        }
+
+        return `${Math.round(value)} ms`;
+    }
+</script>
+
+</body>
+</html>

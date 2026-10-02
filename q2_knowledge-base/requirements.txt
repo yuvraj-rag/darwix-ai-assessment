@@ -1,0 +1,13 @@
+beautifulsoup4
+pymupdf
+pandas
+numpy
+sentence-transformers
+chromadb
+rank-bm25
+fastapi
+uvicorn
+pytest
+python-dotenv
+python-docx
+openpyxl

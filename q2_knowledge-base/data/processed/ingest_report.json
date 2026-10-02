@@ -1,0 +1,40 @@
+{
+  "files_found": 15,
+  "extracted": 13,
+  "skipped": [
+    {
+      "source": "04_expense_claims_apr_may_2026.xlsx",
+      "reason": "unsupported file type '.xlsx' (export the relevant sheet as .csv)"
+    },
+    {
+      "source": "10_scanned_service_completion_form.png",
+      "reason": "unsupported file type '.png'"
+    }
+  ],
+  "errors": [],
+  "empty_after_cleaning": [],
+  "exact_duplicates": [],
+  "near_duplicate_candidates": [],
+  "pii_documents": [
+    {
+      "source": "01_northstar_employee_handbook.pdf",
+      "types": [
+        "email"
+      ]
+    },
+    {
+      "source": "02_employee_NS1047_rohan_mehta.docx",
+      "types": [
+        "phone"
+      ]
+    },
+    {
+      "source": "07_email_thread_claim_CLM26042.docx",
+      "types": [
+        "email"
+      ]
+    }
+  ],
+  "records": 13,
+  "chunks": 15
+}

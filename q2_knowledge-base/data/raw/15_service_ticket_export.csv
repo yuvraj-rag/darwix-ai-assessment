@@ -1,0 +1,6 @@
+ticket_id,account_id,opened,priority,category,status,assigned_to
+INC-7842,AC-8831,2026-05-18,P2,Temperature,Closed,Sana Iqbal
+INC-7801,AC-8831,2026-05-12,P2,Temperature,Closed,Sana Iqbal
+INC-7910,AC-8910,2026-05-27,P3,Preventive maintenance,Open,Rohan Mehta
+INC-7931,AC-8847,2026-05-29,P1,Compressor,Escalated,Vikram Shah
+INC-7950,AC-8991,2026-05-30,P3,Scheduling,Closed,Priya Nair
